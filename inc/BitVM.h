@@ -47,6 +47,7 @@ namespace bitvm {
   }
 
   void exec_binary(uint16_t *pc);
+  void start();
 
   extern const uint32_t functionsAndBytecode[];
   extern uint16_t *bytecode;
