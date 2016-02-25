@@ -1,1 +1,0 @@
-/* Replaced by bitvm extension build process. */
