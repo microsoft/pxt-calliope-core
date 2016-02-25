@@ -1,5 +1,5 @@
 {
    "microbit" :{
-      "configfile" : "source/MicroBitCustomConfig.h"
+      "configfile" : "inc/MicroBitCustomConfig.h"
    }
 }
