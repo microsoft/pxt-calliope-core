@@ -836,6 +836,11 @@ namespace bitvm {
 
     return;
   }
+
+  void start()
+  {
+    exec_binary((uint16_t*)functionsAndBytecode);
+  }
 }  
 
 using namespace bitvm;
