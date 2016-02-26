@@ -30,6 +30,7 @@
 (uint32_t)(void*)::bitvm::mkloc,  // F0 {shim:bitvm::mkloc}
 (uint32_t)(void*)::bitvm::mklocRef,  // F0 {shim:bitvm::mklocRef}
 (uint32_t)(void*)::bitvm::programHash,  // F0 {shim:bitvm::programHash}
+(uint32_t)(void*)::bitvm::start,  // P0 {shim:bitvm::start}
 (uint32_t)(void*)::bitvm::stclo,  // F3 {shim:bitvm::stclo}
 (uint32_t)(void*)::bitvm::stfld,  // P3 {shim:bitvm::stfld}
 (uint32_t)(void*)::bitvm::stfldRef,  // P3 {shim:bitvm::stfldRef}

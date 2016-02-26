@@ -217,6 +217,13 @@
       "full": "bitvm::programHash"
     },
     {
+      "proto": "void           bitvm::start                  ();                                     ",
+      "name": "bitvm::start",
+      "type": "P",
+      "args": 0,
+      "full": "bitvm::start"
+    },
+    {
       "proto": "RefAction*     bitvm::stclo                  (RefAction *a, int idx, uint32_t v);    ",
       "name": "bitvm::stclo",
       "type": "F",
