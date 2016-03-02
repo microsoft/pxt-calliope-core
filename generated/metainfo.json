@@ -112,7 +112,7 @@
       "full": "bitvm::decr"
     },
     {
-      "proto": "void           bitvm::error                  (ERROR code, int subcode = 0);          ",
+      "proto": "void           bitvm::error                  (ERROR code, int subcode);              ",
       "name": "bitvm::error",
       "type": "P",
       "args": 2,

@@ -11,7 +11,7 @@
   "homepage": "https://github.com/microsoft/yelm-microbit-core",
   "license": "MIT",
   "dependencies": {
-    "microbit-dal": "lancaster-university/microbit-dal#v1.4.15"
+    "microbit-dal": "lancaster-university/microbit-dal#v1.4.16"
   },
   "targetDependencies": { },
   "extraIncludes": [ "inc" ]
