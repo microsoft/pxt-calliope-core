@@ -1,16 +1,11 @@
 #!/bin/sh
 
-SRCCOMMON=source/bitvm.cpp
-HEADERS="microbit-touchdevelop/BitVM.h microbit-touchdevelop/MicroBitTouchDevelop.h"
-TRG=build/bbc-microbit-classic-gcc/source/microbit-touchdevelop-combined.hex
-TD=../TouchDevelop
-
 set -x
 set -e
 mkdir -p build
+yotta target bbc-microbit-classic-gcc
 yotta update
-node scripts/functionTable.js $SRCCOMMON $HEADERS yotta_modules/microbit-dal/inc/*.h
+node scripts/functionTable.js inc/BitVM.h inc/MicroBitTouchDevelop.h source/bitvm.cpp yotta_modules/microbit-dal/inc/*.h
+mkdir -p ext
+touch ext/config.h ext/pointers.inc ext/refs.inc
 yotta build
-node scripts/generateEmbedInfo.js $TRG $SRCCOMMON $HEADERS
-cp build/bytecode.js $TD/microbit/bytecode.js
-cd $TD && jake
