@@ -437,24 +437,6 @@
       "full": "bitvm::contract::assert"
     },
     {
-      "proto": "void           ds1307::adjust                (user_types::DateTime d);               ",
-      "name": "ds1307::adjust",
-      "type": "P",
-      "args": 1
-    },
-    {
-      "proto": "uint8_t        ds1307::bcd2bin               (uint8_t val);                          ",
-      "name": "ds1307::bcd2bin",
-      "type": "F",
-      "args": 1
-    },
-    {
-      "proto": "uint8_t        ds1307::bin2bcd               (uint8_t val);                          ",
-      "name": "ds1307::bin2bcd",
-      "type": "F",
-      "args": 1
-    },
-    {
       "proto": "Action         invalid::action               ();                                     ",
       "name": "invalid::action",
       "type": "F",
@@ -995,6 +977,13 @@
       "type": "P",
       "args": 2,
       "full": "bitvm::bitvm_micro_bit::onGamepadButton"
+    },
+    {
+      "proto": "void           micro_bit::onGesture          (int gesture, Action f);                ",
+      "name": "micro_bit::onGesture",
+      "type": "P",
+      "args": 2,
+      "full": "bitvm::bitvm_micro_bit::onGesture"
     },
     {
       "proto": "void           micro_bit::onPinPressed       (int pin, Action a);                    ",

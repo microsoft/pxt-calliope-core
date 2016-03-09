@@ -746,54 +746,6 @@ namespace touch_develop {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // The DS1307 real-time clock and its i2c communication protocol
-  // ---------------------------------------------------------------------------
-
-  namespace ds1307 {
-
-    const int addr = 0x68;
-
-    uint8_t bcd2bin(uint8_t val) {
-      return val - 6 * (val >> 4);
-    }
-
-    uint8_t bin2bcd(uint8_t val) {
-      return val + 6 * (val / 10);
-    }
-
-    void adjust(user_types::DateTime d) {
-      char commands[] = {
-        0,
-        bin2bcd(d->seconds),
-        bin2bcd(d->minutes),
-        bin2bcd(d->hours),
-        0,
-        bin2bcd(d->day),
-        bin2bcd(d->month),
-        bin2bcd(d->year - 2000)
-      };
-      uBit.i2c.write(addr << 1, commands, 8);
-    }
-
-    user_types::DateTime now() {
-      char c = 0;
-      uBit.i2c.write(addr << 1, &c, 1);
-
-      char buf[7];
-      uBit.i2c.read(addr << 1, buf, 7);
-
-      user_types::DateTime d(new user_types::DateTime_());
-      d->seconds = bcd2bin(buf[0] & 0x7F);
-      d->minutes = bcd2bin(buf[1]);
-      d->hours = bcd2bin(buf[2]);
-      d->day = bcd2bin(buf[4]);
-      d->month = bcd2bin(buf[5]);
-      d->year = bcd2bin(buf[6]) + 2000;
-      return d;
-    }
-  }
-
   // -------------------------------------------------------------------------
   // Called at start-up by the generated code (currently not enabled).
   // -------------------------------------------------------------------------

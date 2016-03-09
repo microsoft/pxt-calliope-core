@@ -62,9 +62,6 @@
 (uint32_t)(void*)::bitvm::collection::remove_at,  // P2 bvm {shim:collection::remove_at}
 (uint32_t)(void*)::bitvm::collection::set_at,  // P3 bvm {shim:collection::set_at}
 (uint32_t)(void*)::bitvm::contract::assert,  // P2 bvm {shim:contract::assert}
-(uint32_t)(void*)::touch_develop::ds1307::adjust,  // P1 {shim:ds1307::adjust}
-(uint32_t)(void*)::touch_develop::ds1307::bcd2bin,  // F1 {shim:ds1307::bcd2bin}
-(uint32_t)(void*)::touch_develop::ds1307::bin2bcd,  // F1 {shim:ds1307::bin2bcd}
 (uint32_t)(void*)::touch_develop::invalid::action,  // F0 {shim:invalid::action}
 (uint32_t)(void*)::touch_develop::math::abs,  // F1 {shim:math::abs}
 (uint32_t)(void*)::touch_develop::math::clamp,  // F3 {shim:math::clamp}
@@ -148,6 +145,7 @@
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::onDatagramReceived,  // P1 over {shim:micro_bit::onDatagramReceived}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::onDeviceInfo,  // P2 over {shim:micro_bit::onDeviceInfo}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::onGamepadButton,  // P2 over {shim:micro_bit::onGamepadButton}
+(uint32_t)(void*)::bitvm::bitvm_micro_bit::onGesture,  // P2 over {shim:micro_bit::onGesture}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::onPinPressed,  // P2 over {shim:micro_bit::onPinPressed}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::onSignalStrengthChanged,  // P1 over {shim:micro_bit::onSignalStrengthChanged}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::on_event,  // P2 over {shim:micro_bit::on_event}
