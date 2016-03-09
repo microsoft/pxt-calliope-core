@@ -542,6 +542,13 @@ namespace bitvm {
             registerWithDal(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, f);    
         }
     }
+    
+    // -------------------------------------------------------------------------
+    // Gestures
+    // -------------------------------------------------------------------------
+    void onGesture(int gesture, Action f) {
+        registerWithDal(MICROBIT_ID_GESTURE, gesture, f);
+    }
 
     // -------------------------------------------------------------------------
     // Buttons

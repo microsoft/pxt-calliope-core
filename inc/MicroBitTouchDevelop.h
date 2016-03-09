@@ -473,6 +473,8 @@ namespace touch_develop {
     int datagramGetNumber(int index);
     int datagramGetRSSI();
     void onDatagramReceived(function<void()> f);
+    
+    void onGesture(int gesture, function<void()> f);
 
     namespace devices {
       void remote_control(int event);
