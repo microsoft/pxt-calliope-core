@@ -318,6 +318,8 @@ namespace touch_develop {
     int compassHeading();
     
     int lightLevel();
+    
+    int temperature();
 
     // in micro Tesla
     //  x = 0, y = 1, z = 2, strength = 3

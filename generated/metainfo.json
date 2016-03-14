@@ -1236,6 +1236,12 @@
       "args": 0
     },
     {
+      "proto": "int            micro_bit::temperature        ();                                     ",
+      "name": "micro_bit::temperature",
+      "type": "F",
+      "args": 0
+    },
+    {
       "proto": "int            micro_bit::thermometerGetTemperature ();                                     ",
       "name": "micro_bit::thermometerGetTemperature",
       "type": "F",

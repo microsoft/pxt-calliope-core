@@ -326,6 +326,10 @@ namespace touch_develop {
     int lightLevel() {
         return uBit.display.readLightLevel();
     }
+    
+    int temperature() {
+        return uBit.thermometer.getTemperature();
+    }
 
     int getMagneticForce(int dimension) {
       if (!uBit.compass.isCalibrated())

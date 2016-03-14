@@ -184,6 +184,7 @@
 (uint32_t)(void*)::touch_develop::micro_bit::signalStrength,  // F0 {shim:micro_bit::signalStrength}
 (uint32_t)(void*)::touch_develop::micro_bit::signalStrengthHandler,  // P1 {shim:micro_bit::signalStrengthHandler}
 (uint32_t)(void*)::touch_develop::micro_bit::stopAnimation,  // P0 {shim:micro_bit::stopAnimation}
+(uint32_t)(void*)::touch_develop::micro_bit::temperature,  // F0 {shim:micro_bit::temperature}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::thermometerGetTemperature,  // F0 over {shim:micro_bit::thermometerGetTemperature}
 (uint32_t)(void*)::touch_develop::micro_bit::unPlot,  // P2 {shim:micro_bit::unPlot}
 (uint32_t)(void*)::touch_develop::number::add,  // F2 {shim:number::add}
