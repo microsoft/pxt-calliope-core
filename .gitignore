@@ -7,3 +7,4 @@ yotta_modules
 yotta_targets
 Makefile.local
 ext
+upload.tar.gz
