@@ -1,14 +1,14 @@
 {
-  "name": "yelm-microbit-core",
+  "name": "kindscript-microbit-core",
   "version": "0.0.1",
-  "description": "The glue layer that binds together TypeScript/Yelm programs compiled to C++ and a microbit runtime system.",
+  "description": "The glue layer that binds together KindScript programs compiled to C++ and a microbit runtime system.",
   "keywords": [],
   "author": "Microsoft Corporation",
   "repository": {
-    "url": "ssh://git@github.com:Microsoft/yelm-microbit-core.git",
+    "url": "ssh://git@github.com:Microsoft/kindscript-microbit-core.git",
     "type": "git"
   },
-  "homepage": "https://github.com/microsoft/yelm-microbit-core",
+  "homepage": "https://github.com/microsoft/kindscript-microbit-core",
   "license": "MIT",
   "dependencies": {
     "microbit-dal": "lancaster-university/microbit-dal#v1.4.17"
