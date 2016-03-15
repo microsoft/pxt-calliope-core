@@ -247,6 +247,11 @@ namespace touch_develop {
         if (radioEnable() != MICROBIT_OK) return;
         uBit.radio.setGroup(id);
     }
+    
+    void setTransmitPower(int power) {
+        if (radioEnable() != MICROBIT_OK) return;
+        uBit.radio.setTransmitPower(power);
+    }
         
     void broadcastMessage(int message) {
         if (radioEnable() != MICROBIT_OK) return;

@@ -338,6 +338,8 @@ namespace touch_develop {
     int radioEnable();
     
     void setGroup(int id);
+    
+    void setTransmitPower(int power);
         
     void broadcastMessage(int message);
 
