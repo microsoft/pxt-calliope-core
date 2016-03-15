@@ -1184,6 +1184,12 @@
       "args": 2
     },
     {
+      "proto": "void           micro_bit::setTransmitPower   (int power);                            ",
+      "name": "micro_bit::setTransmitPower",
+      "type": "P",
+      "args": 1
+    },
+    {
       "proto": "void           micro_bit::showAnimation      (uint32_t lit, int ms);                 ",
       "name": "micro_bit::showAnimation",
       "type": "P",

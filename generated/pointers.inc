@@ -176,6 +176,7 @@
 (uint32_t)(void*)::touch_develop::micro_bit::setGroup,  // P1 {shim:micro_bit::setGroup}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::setImagePixel,  // P4 over {shim:micro_bit::setImagePixel}
 (uint32_t)(void*)::touch_develop::micro_bit::setServoPulseUs,  // P2 {shim:micro_bit::setServoPulseUs}
+(uint32_t)(void*)::touch_develop::micro_bit::setTransmitPower,  // P1 {shim:micro_bit::setTransmitPower}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::showAnimation,  // P2 over {shim:micro_bit::showAnimation}
 (uint32_t)(void*)::touch_develop::micro_bit::showDigit,  // P1 {shim:micro_bit::showDigit}
 (uint32_t)(void*)::bitvm::bitvm_micro_bit::showImage,  // P2 over {shim:micro_bit::showImage}
