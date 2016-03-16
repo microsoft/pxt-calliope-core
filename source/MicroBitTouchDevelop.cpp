@@ -370,6 +370,10 @@ namespace touch_develop {
       // unknown
       else return 0;        
     }
+    
+    void setAccelerometerRange(int range) {
+        uBit.accelerometer.setRange(range);
+    }
 
     int getRotation(int dimension) {
       if (dimension == 0)

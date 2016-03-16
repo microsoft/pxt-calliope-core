@@ -327,6 +327,8 @@ namespace touch_develop {
 
     //  x = 0, y = 1, z = 2, strength = 3
     int getAcceleration(int dimension);
+    
+    void setAccelerometerRange(int range);
 
     //  pitch = 0, roll = 1
     int getRotation(int dimension);
