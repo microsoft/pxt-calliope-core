@@ -317,6 +317,10 @@ namespace touch_develop {
     // Gestures
     // -------------------------------------------------------------------------
     void onGesture(int gesture, function<void()> f) {
+        if (gesture == GESTURE_8G || gesture == GESTURE_6G)
+            uBit.accelerometer.setRange(8);
+        else if (gesture == GESTURE_3G)
+            uBit.accelerometer.setRange(4);
         registerWithDal(MICROBIT_ID_GESTURE, gesture, f);
     }
     
