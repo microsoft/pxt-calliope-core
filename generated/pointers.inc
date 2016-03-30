@@ -1,4 +1,3 @@
-(uint32_t)(void*)::touch_develop::action::is_invalid,  // F1 {shim:action::is_invalid}
 (uint32_t)(void*)::bitvm::action::mk,  // F3 bvm {shim:action::mk}
 (uint32_t)(void*)::bitvm::action::run,  // P1 bvm {shim:action::run}
 (uint32_t)(void*)::bitvm::action::run1,  // P2 bvm {shim:action::run1}
@@ -62,7 +61,6 @@
 (uint32_t)(void*)::bitvm::collection::remove_at,  // P2 bvm {shim:collection::remove_at}
 (uint32_t)(void*)::bitvm::collection::set_at,  // P3 bvm {shim:collection::set_at}
 (uint32_t)(void*)::bitvm::contract::assert,  // P2 bvm {shim:contract::assert}
-(uint32_t)(void*)::touch_develop::invalid::action,  // F0 {shim:invalid::action}
 (uint32_t)(void*)::touch_develop::math::abs,  // F1 {shim:math::abs}
 (uint32_t)(void*)::touch_develop::math::clamp,  // F3 {shim:math::clamp}
 (uint32_t)(void*)::touch_develop::math::max,  // F2 {shim:math::max}

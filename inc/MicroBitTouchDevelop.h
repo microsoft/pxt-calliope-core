@@ -81,8 +81,6 @@ namespace touch_develop {
   typedef int Number;
   typedef bool Boolean;
   typedef ManagedString String;
-  typedef function<void()> Action;
-  template <typename T> using Action1 = function<void(T)>;
   template <typename T> using Collection_of = ManagedType<vector<T>>;
   template <typename T> using Collection = ManagedType<vector<T>>;
 
@@ -107,9 +105,6 @@ namespace touch_develop {
     void assert(bool x, ManagedString msg);
   }
 
-  namespace invalid {
-    Action action();
-  }
 
   namespace string {
     ManagedString concat(ManagedString s1, ManagedString s2);
@@ -131,28 +126,6 @@ namespace touch_develop {
     int to_number(ManagedString s);
 
     void post_to_wall(ManagedString s);
-  }
-
-  namespace action {
-    void run(Action a);
-
-    bool is_invalid(Action a);
-  }
-
-  namespace action1 {
-    template <typename T>
-    inline void run(Action1<T> a, T arg) {
-      if (a)
-        a(arg);
-    }
-
-    template <typename T>
-    inline bool is_invalid(Action1<T> a) {
-      if (a)
-        return true;
-      else
-        return false;
-    }
   }
 
   namespace math {

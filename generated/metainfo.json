@@ -1,12 +1,6 @@
 {
   "functions": [
     {
-      "proto": "bool           action::is_invalid            (Action a);                             ",
-      "name": "action::is_invalid",
-      "type": "F",
-      "args": 1
-    },
-    {
       "proto": "Action         action::mk                    (int reflen, int totallen, int startptr); ",
       "name": "action::mk",
       "type": "F",
@@ -112,7 +106,7 @@
       "full": "bitvm::decr"
     },
     {
-      "proto": "void           bitvm::error                  (ERROR code, int subcode);              ",
+      "proto": "void           bitvm::error                  (ERROR code, int subcode = 0);          ",
       "name": "bitvm::error",
       "type": "P",
       "args": 2,
@@ -435,12 +429,6 @@
       "type": "P",
       "args": 2,
       "full": "bitvm::contract::assert"
-    },
-    {
-      "proto": "Action         invalid::action               ();                                     ",
-      "name": "invalid::action",
-      "type": "F",
-      "args": 0
     },
     {
       "proto": "int            math::abs                     (int x);                                ",

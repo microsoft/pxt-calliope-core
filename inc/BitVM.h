@@ -25,6 +25,14 @@
 #endif
 
 namespace bitvm {
+  typedef uint32_t Action;
+  typedef uint32_t ImageLiteral;
+
+  namespace action {
+    Action mk(int reflen, int totallen, int startptr);
+    void run1(Action a, int arg);
+    void run(Action a);
+  }
 
   typedef enum {
     ERR_INVALID_BINARY_HEADER = 5,
@@ -362,6 +370,11 @@ namespace bitvm {
     }
   };
 }
+
+using namespace bitvm;
+
+#define getstr(off) ((const char*)&bytecode[off])
+#define getbytes(off) ((ImageData*)(void*)&bytecode[off])
 
 #endif
 

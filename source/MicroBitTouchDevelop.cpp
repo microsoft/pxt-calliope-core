@@ -55,11 +55,6 @@ namespace touch_develop {
     }
   }
 
-  namespace invalid {
-    Action action() {
-      return NULL;
-    }
-  }
 
   namespace string {
     bool in_range(ManagedString s, int i) {
@@ -110,20 +105,6 @@ namespace touch_develop {
 
     void post_to_wall(ManagedString s) {
       uBit.serial.printf("%s\r\n", s.toCharArray());
-    }
-  }
-
-  namespace action {
-    void run(Action a) {
-      if (a)
-        a();
-    }
-
-    bool is_invalid(Action a) {
-      if (a)
-        return true;
-      else
-        return false;
     }
   }
 

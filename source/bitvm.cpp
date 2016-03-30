@@ -9,9 +9,6 @@
 #define DBG printf
 //#define DBG(...)
 
-#define getstr(off) ((const char*)&bytecode[off])
-#define getbytes(off) ((ImageData*)(void*)&bytecode[off])
-
 // Macros to reference function pointer in the jump-list
 // c in mbitc - stands for 'common'
 #define mbit(x) (void*)bitvm_micro_bit::x,
@@ -399,8 +396,6 @@ namespace bitvm {
       return r;
     }
   }
-
-  typedef uint32_t Action;
 
   namespace action {
     Action mk(int reflen, int totallen, int startptr)
