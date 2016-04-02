@@ -1,19 +1,17 @@
-#ifndef __BITVM_H
-#define __BITVM_H
+#ifndef __KINDSCRIPT_H
+#define __KINDSCRIPT_H
 
 // #define DEBUG_MEMLEAKS 1
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include "MicroBitCustomConfig.h"
+
 #include "MicroBit.h"
 #include "MicroBitImage.h"
 #include "ManagedString.h"
 #include "ManagedType.h"
+
 #define printf(...) uBit.serial.printf(__VA_ARGS__)
 // #define printf(...)
-
-// for marking glue functions
-#define GLUE /*glue*/
 
 #include <stdio.h>
 #include <string.h>
@@ -24,15 +22,10 @@
 #include <set>
 #endif
 
-namespace bitvm {
+namespace ks {
   typedef uint32_t Action;
   typedef uint32_t ImageLiteral;
 
-  namespace action {
-    Action mk(int reflen, int totallen, int startptr);
-    void run1(Action a, int arg);
-    void run(Action a);
-  }
 
   typedef enum {
     ERR_INVALID_BINARY_HEADER = 5,
@@ -41,30 +34,57 @@ namespace bitvm {
     ERR_SIZE = 9,
   } ERROR;
 
+  extern const uint32_t functionsAndBytecode[];
   extern uint32_t *globals;
   extern int numGlobals;
+  extern uint16_t *bytecode;
+  class RefRecord;
 
-
-  inline void die() { uBit.panic(42); }
-
+  // Utility functions
+  void registerWithDal(int id, int event, Action a);
+  void runInBackground(Action a);
+  void runAction0(Action a);
+  void runAction1(Action a, int arg);
+  Action mkAction(int reflen, int totallen, int startptr);
   void error(ERROR code, int subcode = 0);
+  void exec_binary(uint16_t *pc);
+  void start();
+  void debugMemLeaks();
+  // allocate [sz] words and clear them
+  uint32_t *allocate(uint16_t sz);
+  int templateHash();
+  int programHash();
+  RefRecord* mkRecord(int reflen, int totallen);
+
+  // The standard calling convention is:
+  //   - when a pointer is loaded from a local/global/field etc, and incr()ed
+  //     (in other words, its presence on stack counts as a reference)
+  //   - after a function call, all pointers are popped off the stack and decr()ed
+  // This does not apply to the RefRecord and st/ld(ref) methods - they unref()
+  // the RefRecord* this.
+  int incr(uint32_t e);
+  void decr(uint32_t e);
+
+  inline void *ptrOfLiteral(int offset)
+  {
+    return &bytecode[offset];
+  }
+
+  inline ImageData* imageBytes(int offset)
+  {
+    return (ImageData*)(void*)&bytecode[offset];
+  }
+
 
   inline void check(int cond, ERROR code, int subcode = 0)
   {
     if (!cond) error(code, subcode);
   }
 
-  void exec_binary(uint16_t *pc);
-  void start();
-
-  extern const uint32_t functionsAndBytecode[];
-  extern uint16_t *bytecode;
-
 
 #ifdef DEBUG_MEMLEAKS
   class RefObject;
   extern std::set<RefObject*> allptrs;
-  void debugMemLeaks();
 #endif
 
   // A base abstract class for ref-counted objects.
@@ -81,8 +101,7 @@ namespace bitvm {
 #endif
     }
 
-    // Call to disable pointer tracking on the current instance. Currently used
-    // by string literals.
+    // Call to disable pointer tracking on the current instance.
     void canLeak()
     {
 #ifdef DEBUG_MEMLEAKS
@@ -128,39 +147,9 @@ namespace bitvm {
   };
 
   // Checks if object has a VTable, or if its RefCounted* from the runtime.
-  // XXX 'inline' needs to be on separate line for embedding script
-  inline
-  bool hasVTable(uint32_t e)
+  inline bool hasVTable(uint32_t e)
   {
     return (*((uint32_t*)e) & 1) == 0;
-  }
-
-  // The standard calling convention is:
-  //   - when a pointer is loaded from a local/global/field etc, and incr()ed
-  //     (in other words, its presence on stack counts as a reference)
-  //   - after a function call, all pointers are popped off the stack and decr()ed
-  // This does not apply to the RefRecord and st/ld(ref) methods - they unref()
-  // the RefRecord* this.
-  inline
-  void incr(uint32_t e)
-  {
-    if (e) {
-      if (hasVTable(e))
-        ((RefObject*)e)->ref();
-      else
-        ((RefCounted*)e)->incr();
-    }
-  }
-
-  inline 
-  void decr(uint32_t e)
-  {
-    if (e) {
-      if (hasVTable(e))
-        ((RefObject*)e)->unref();
-      else
-        ((RefCounted*)e)->decr();
-    }
   }
 
   // Ref-counted wrapper around any C++ object.
@@ -214,6 +203,19 @@ namespace bitvm {
     {
       printf("RefCollection %p r=%d flags=%d size=%d [%p, ...]\n", this, refcnt, flags, data.size(), data.size() > 0 ? data[0] : 0);
     }
+
+    inline bool in_range(int x) {
+      return (0 <= x && x < (int)data.size());
+    }
+
+    inline int length() { return data.size(); }
+
+    void push(uint32_t x);
+    uint32_t getAt(int x);
+    void removeAt(int x);
+    void setAt(int x, uint32_t y);
+    int indexOf(uint32_t x, int start);
+    int removeElement(uint32_t x);
   };
 
   // A ref-counted byte buffer
@@ -232,6 +234,10 @@ namespace bitvm {
     {
       printf("RefBuffer %p r=%d size=%d [%p, ...]\n", this, refcnt, data.size(), data.size() > 0 ? data[0] : 0);
     }
+
+    char *cptr() { return (char*)&data[0]; }
+    int size() { return data.size(); }
+
   };
 
   // A ref-counted, user-defined Touch Develop object.
@@ -247,48 +253,14 @@ namespace bitvm {
     // The object is allocated, so that there is space at the end for the fields.
     uint32_t fields[];
 
-    virtual ~RefRecord()
-    {
-      //printf("DELREC: %p\n", this);
-      for (int i = 0; i < this->reflen; ++i) {
-        decr(fields[i]);
-        fields[i] = 0;
-      }
-    }
+    virtual ~RefRecord();
+    virtual void print();
 
-    virtual void print()
-    {
-      printf("RefRecord %p r=%d size=%d (%d refs)\n", this, refcnt, len, reflen);
-    }
+    uint32_t ld(int idx);
+    uint32_t ldref(int idx);
+    void st(int idx, uint32_t v);
+    void stref(int idx, uint32_t v);
 
-    inline uint32_t ld(int idx)
-    {
-      check(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
-      return fields[idx];
-    }
-
-    inline uint32_t ldref(int idx)
-    {
-      //printf("LD %p len=%d reflen=%d idx=%d\n", this, len, reflen, idx);
-      check(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 2);
-      uint32_t tmp = fields[idx];
-      incr(tmp);
-      return tmp;
-    }
-
-    inline void st(int idx, uint32_t v)
-    {
-      check(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
-      fields[idx] = v;
-    }
-
-    inline void stref(int idx, uint32_t v)
-    {
-      //printf("ST %p len=%d reflen=%d idx=%d\n", this, len, reflen, idx);
-      check(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 4);
-      decr(fields[idx]);
-      fields[idx] = v;
-    }
   };
 
   class RefAction;
@@ -327,7 +299,7 @@ namespace bitvm {
       fields[idx] = v;
     }
 
-    inline uint32_t run(int arg)
+    inline uint32_t runCore(int arg) // use runAction*()
     {
       this->ref();
       uint32_t r = this->func(this, &this->fields[0], arg);
@@ -369,18 +341,21 @@ namespace bitvm {
       decr(v);
     }
   };
+
 }
 
-using namespace bitvm;
+// The ARM Thumb generator in the JavaScript code is parsing
+// the hex file and looks for the magic numbers as present here.
+//
+// Then it fetches function pointer addresses from there.
+  
+#define KS_SHIMS_BEGIN \
+namespace ks { \
+  const uint32_t functionsAndBytecode[] __attribute__((aligned(0x20))) = { \
+    0x08010801, 0x42424242, 0x08010801, 0x8de9d83e, \
 
-#define getstr(off) ((const char*)&bytecode[off])
-#define getbytes(off) ((ImageData*)(void*)&bytecode[off])
+#define KS_SHIMS_END }; }
 
-#endif
-
-/* mbed functions to import. The pointer-table generation script will pick these up. */
-#if POINTER_GENERATOR_DOESNT_REALLY_DO_IFDEFS
-void wait_us(int us);
 #endif
 
 // vim: ts=2 sw=2 expandtab
