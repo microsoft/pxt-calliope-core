@@ -22,7 +22,7 @@
 #include <set>
 #endif
 
-namespace ks {
+namespace kindscript {
   typedef uint32_t Action;
   typedef uint32_t ImageLiteral;
 
@@ -350,7 +350,7 @@ namespace ks {
 // Then it fetches function pointer addresses from there.
   
 #define KS_SHIMS_BEGIN \
-namespace ks { \
+namespace kindscript { \
   const uint32_t functionsAndBytecode[] __attribute__((aligned(0x20))) = { \
     0x08010801, 0x42424242, 0x08010801, 0x8de9d83e, \
 

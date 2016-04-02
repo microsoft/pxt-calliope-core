@@ -9,7 +9,7 @@
 
 #include <map>
 
-namespace ks {
+namespace kindscript {
   int incr(uint32_t e)
   {
     if (e) {
@@ -258,7 +258,7 @@ namespace ks {
     panic(42);
   }
 
-
+  uint16_t *bytecode;
   uint32_t *globals;
   int numGlobals;
 
