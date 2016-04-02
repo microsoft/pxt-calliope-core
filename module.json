@@ -1,6 +1,6 @@
 {
   "name": "kindscript-microbit-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The glue layer that binds together KindScript programs compiled to C++ and a microbit runtime system.",
   "keywords": [],
   "author": "Microsoft Corporation",
@@ -13,6 +13,8 @@
   "dependencies": {
     "microbit-dal": "lancaster-university/microbit-dal#v1.4.17"
   },
-  "targetDependencies": { },
-  "extraIncludes": [ "inc" ]
+  "targetDependencies": {},
+  "extraIncludes": [
+    "inc"
+  ]
 }
