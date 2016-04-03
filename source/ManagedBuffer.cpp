@@ -231,6 +231,17 @@ int ManagedBuffer::getByte(int position)
         return MICROBIT_INVALID_PARAMETER;
 } 
 
+/**
+  * Get current ptr, do not decr() it, and set the current instance to an empty buffer.
+  * This is to be used by specialized runtimes which pass BufferData around.
+  */
+BufferData *ManagedBuffer::leakData()
+{
+    BufferData* res = ptr;
+    initEmpty();
+    return res;
+}
+
 
 int ManagedBuffer::fill(uint8_t value, int offset, int length)
 {
