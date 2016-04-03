@@ -75,6 +75,11 @@ namespace kindscript {
     return (ImageData*)(void*)&bytecode[offset];
   }
 
+  // Checks if object has a VTable, or if its RefCounted* from the runtime.
+  inline bool hasVTable(uint32_t e)
+  {
+    return (*((uint32_t*)e) & 1) == 0;
+  }
 
   inline void check(int cond, ERROR code, int subcode = 0)
   {
@@ -125,10 +130,7 @@ namespace kindscript {
       }
     }
 
-    virtual void print()
-    {
-      printf("RefObject %p\n", this);
-    }
+    virtual void print();
 
     virtual ~RefObject()
     {
@@ -139,18 +141,12 @@ namespace kindscript {
 #endif
     }
 
-    // This is used by index_of function, overridden in RefString
+    // This is used by indexOf function, overridden in RefString
     virtual bool equals(RefObject *other)
     {
       return this == other;
     }
   };
-
-  // Checks if object has a VTable, or if its RefCounted* from the runtime.
-  inline bool hasVTable(uint32_t e)
-  {
-    return (*((uint32_t*)e) & 1) == 0;
-  }
 
   // Ref-counted wrapper around any C++ object.
   template <class T>
@@ -160,9 +156,7 @@ namespace kindscript {
   public:
     T v;
 
-    virtual ~RefStruct()
-    {
-    }
+    virtual ~RefStruct() { }
 
     virtual void print()
     {
@@ -183,26 +177,10 @@ namespace kindscript {
     uint16_t flags;
     std::vector<uint32_t> data;
 
-    RefCollection(uint16_t f)
-    {
-      flags = f;
-    }
+    RefCollection(uint16_t f) : flags(f) {}
 
-    virtual ~RefCollection()
-    {
-      // printf("KILL "); this->print();
-      if (flags & 1)
-        for (uint32_t i = 0; i < data.size(); ++i) {
-          decr(data[i]);
-          data[i] = 0;
-        }
-      data.resize(0);
-    }
-
-    virtual void print()
-    {
-      printf("RefCollection %p r=%d flags=%d size=%d [%p, ...]\n", this, refcnt, flags, data.size(), data.size() > 0 ? data[0] : 0);
-    }
+    virtual ~RefCollection();
+    virtual void print();
 
     inline bool in_range(int x) {
       return (0 <= x && x < (int)data.size());
@@ -216,28 +194,6 @@ namespace kindscript {
     void setAt(int x, uint32_t y);
     int indexOf(uint32_t x, int start);
     int removeElement(uint32_t x);
-  };
-
-  // A ref-counted byte buffer
-  class RefBuffer
-    : public RefObject
-  {
-  public:
-    std::vector<uint8_t> data;
-
-    virtual ~RefBuffer()
-    {
-      data.resize(0);
-    }
-
-    virtual void print()
-    {
-      printf("RefBuffer %p r=%d size=%d [%p, ...]\n", this, refcnt, data.size(), data.size() > 0 ? data[0] : 0);
-    }
-
-    char *cptr() { return (char*)&data[0]; }
-    int size() { return data.size(); }
-
   };
 
   // A ref-counted, user-defined Touch Develop object.
@@ -275,23 +231,13 @@ namespace kindscript {
     uint8_t len;
     uint8_t reflen;
     ActionCB func; // The function pointer
+    // fields[] contain captured locals
     uint32_t fields[];
 
-    // fields[] contain captured locals
-    virtual ~RefAction()
-    {
-      for (int i = 0; i < this->reflen; ++i) {
-        decr(fields[i]);
-        fields[i] = 0;
-      }
-    }
+    virtual ~RefAction();
+    virtual void print();
 
-    virtual void print()
-    {
-      printf("RefAction %p r=%d pc=0x%lx size=%d (%d refs)\n", this, refcnt, (const uint8_t*)func - (const uint8_t*)bytecode, len, reflen);
-    }
-
-    inline void st(int idx, uint32_t v)
+    inline void stCore(int idx, uint32_t v)
     {
       //printf("ST [%d] = %d ", idx, v); this->print();
       check(0 <= idx && idx < len, ERR_OUT_OF_BOUNDS, 10);
@@ -315,11 +261,7 @@ namespace kindscript {
   public:
     uint32_t v;
 
-    virtual void print()
-    {
-      printf("RefLocal %p r=%d v=%d\n", this, refcnt, v);
-    }
-
+    virtual void print();
     RefLocal() : v(0) {}
   };
 
@@ -329,17 +271,33 @@ namespace kindscript {
   public:
     uint32_t v;
 
-    virtual void print()
-    {
-      printf("RefRefLocal %p r=%d v=%p\n", this, refcnt, (void*)v);
-    }
+    virtual void print();
+    virtual ~RefRefLocal();
 
     RefRefLocal() : v(0) {}
+  };
 
-    virtual ~RefRefLocal()
+
+  // A ref-counted byte buffer
+  class RefBuffer
+    : public RefObject
+  {
+  public:
+    std::vector<uint8_t> data;
+
+    virtual ~RefBuffer()
     {
-      decr(v);
+      data.resize(0);
     }
+
+    virtual void print()
+    {
+      printf("RefBuffer %p r=%d size=%d [%p, ...]\n", this, refcnt, data.size(), data.size() > 0 ? data[0] : 0);
+    }
+
+    char *cptr() { return (char*)&data[0]; }
+    int size() { return data.size(); }
+
   };
 
 }
@@ -352,7 +310,7 @@ namespace kindscript {
 #define KS_SHIMS_BEGIN \
 namespace kindscript { \
   const uint32_t functionsAndBytecode[] __attribute__((aligned(0x20))) = { \
-    0x08010801, 0x42424242, 0x08010801, 0x8de9d83e, \
+    0x08010801, 0x42424242, 0x08010801, 0x8de9d83e,
 
 #define KS_SHIMS_END }; }
 

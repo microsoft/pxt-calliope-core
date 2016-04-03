@@ -1,35 +1,27 @@
 #include "kindscript.h"
-
-/*
-#include <cstdlib>
-#include <climits>
-#include <cmath>
-#include <vector>
-*/
-
 #include <map>
 
 namespace kindscript {
-  int incr(uint32_t e)
-  {
-    if (e) {
-      if (hasVTable(e))
-        ((RefObject*)e)->ref();
-      else
-        ((RefCounted*)e)->incr();
+    int incr(uint32_t e)
+    {
+      if (e) {
+        if (hasVTable(e))
+          ((RefObject*)e)->ref();
+        else
+          ((RefCounted*)e)->incr();
+      }
+      return e;
     }
-    return e;
-  }
 
-  void decr(uint32_t e)
-  {
-    if (e) {
-      if (hasVTable(e))
-        ((RefObject*)e)->unref();
-      else
-        ((RefCounted*)e)->decr();
+    void decr(uint32_t e)
+    {
+      if (e) {
+        if (hasVTable(e))
+          ((RefObject*)e)->unref();
+        else
+          ((RefCounted*)e)->decr();
+      }
     }
-  }
 
     Action mkAction(int reflen, int totallen, int startptr)
     {
@@ -37,7 +29,6 @@ namespace kindscript {
       check(reflen <= totallen && totallen <= 255, ERR_SIZE, 2);
       check(bytecode[startptr] == 0xffff, ERR_INVALID_BINARY_HEADER, 3);
       check(bytecode[startptr + 1] == 0, ERR_INVALID_BINARY_HEADER, 4);
-
 
       uint32_t tmp = (uint32_t)&bytecode[startptr];
 
@@ -190,6 +181,56 @@ namespace kindscript {
         return 1;
       }
       return 0;
+    }
+
+    void RefObject::print()
+    {
+      printf("RefObject %p\n", this);
+    }
+
+    RefCollection::~RefCollection()
+    {
+      // printf("KILL "); this->print();
+      if (flags & 1)
+        for (uint32_t i = 0; i < data.size(); ++i) {
+          decr(data[i]);
+          data[i] = 0;
+        }
+      data.resize(0);
+    }
+
+    void RefCollection::print()
+    {
+      printf("RefCollection %p r=%d flags=%d size=%d [%p, ...]\n", this, refcnt, flags, data.size(), data.size() > 0 ? data[0] : 0);
+    }
+
+    // fields[] contain captured locals
+    RefAction::~RefAction()
+    {
+      for (int i = 0; i < this->reflen; ++i) {
+        decr(fields[i]);
+        fields[i] = 0;
+      }
+    }
+
+    void RefAction::print()
+    {
+      printf("RefAction %p r=%d pc=0x%lx size=%d (%d refs)\n", this, refcnt, (const uint8_t*)func - (const uint8_t*)bytecode, len, reflen);
+    }
+
+    void RefLocal::print()
+    {
+      printf("RefLocal %p r=%d v=%d\n", this, refcnt, v);
+    }
+
+    void RefRefLocal::print()
+    {
+      printf("RefRefLocal %p r=%d v=%p\n", this, refcnt, (void*)v);
+    }
+
+    RefRefLocal::~RefRefLocal()
+    {
+      decr(v);
     }
 
 #ifdef DEBUG_MEMLEAKS
