@@ -199,7 +199,7 @@ bool ManagedBuffer::operator== (const ManagedBuffer& p)
  */
 int ManagedBuffer::setByte(int position, uint8_t value)
 {
-    if (position < ptr->length)
+    if (0 <= position && position < ptr->length)
     {
         ptr->payload[position] = value;
         return MICROBIT_OK;
@@ -225,7 +225,7 @@ int ManagedBuffer::setByte(int position, uint8_t value)
  */
 int ManagedBuffer::getByte(int position)
 {
-    if (position < ptr->length)
+    if (0 <= position && position < ptr->length)
         return ptr->payload[position];
     else
         return MICROBIT_INVALID_PARAMETER;
@@ -245,7 +245,7 @@ BufferData *ManagedBuffer::leakData()
 
 int ManagedBuffer::fill(uint8_t value, int offset, int length)
 {
-    if (offset > ptr->length)
+    if (offset < 0 || offset > ptr->length)
         return MICROBIT_INVALID_PARAMETER;
     if (length < 0)
         length = ptr->length;
