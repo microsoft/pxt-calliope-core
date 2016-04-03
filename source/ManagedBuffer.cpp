@@ -304,7 +304,7 @@ void ManagedBuffer::rotate(int offset)
     }
 }
 
-int ManagedBuffer::writeManagedBuffer(int dstOffset, const ManagedBuffer &src, int srcOffset, int length)
+int ManagedBuffer::writeBuffer(int dstOffset, const ManagedBuffer &src, int srcOffset, int length)
 {
     if (length < 0)
         length = src.length();

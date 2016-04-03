@@ -236,8 +236,6 @@ class ManagedBuffer
       */
     int length() const { return ptr->length; }
 
-    ManagedBuffer clone() const { return slice(); }
-
     int fill(uint8_t value, int offset = 0, int length = -1);
 
     ManagedBuffer slice(int offset = 0, int length = -1) const;
@@ -250,7 +248,7 @@ class ManagedBuffer
 
     int writeBytes(int dstOffset, uint8_t *src, int length, bool swapBytes = false);
 
-    int writeManagedBuffer(int dstOffset, const ManagedBuffer &src, int srcOffset = 0, int length = -1);
+    int writeBuffer(int dstOffset, const ManagedBuffer &src, int srcOffset = 0, int length = -1);
 
     bool isReadOnly() const { return ptr->isReadOnly(); }
 };
