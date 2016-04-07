@@ -1,14 +1,14 @@
 {
-  "name": "kindscript-microbit-core",
+  "name": "pxt-microbit-core",
   "version": "0.1.5",
-  "description": "The glue layer that binds together KindScript programs compiled to C++ and a microbit runtime system.",
+  "description": "The glue layer that binds together PXT programs compiled to C++ and a microbit runtime system.",
   "keywords": [],
   "author": "Microsoft Corporation",
   "repository": {
-    "url": "ssh://git@github.com:Microsoft/kindscript-microbit-core.git",
+    "url": "ssh://git@github.com:Microsoft/pxt-microbit-core.git",
     "type": "git"
   },
-  "homepage": "https://github.com/microsoft/kindscript-microbit-core",
+  "homepage": "https://github.com/microsoft/pxt-microbit-core",
   "license": "MIT",
   "dependencies": {
     "microbit-dal": "lancaster-university/microbit-dal#v1.4.17"

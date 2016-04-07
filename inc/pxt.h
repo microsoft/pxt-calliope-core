@@ -1,5 +1,5 @@
-#ifndef __KINDSCRIPT_H
-#define __KINDSCRIPT_H
+#ifndef __PXT_H
+#define __PXT_H
 
 // #define DEBUG_MEMLEAKS 1
 
@@ -22,7 +22,7 @@
 #include <set>
 #endif
 
-namespace kindscript {
+namespace pxt {
   typedef uint32_t Action;
   typedef uint32_t ImageLiteral;
 
@@ -307,12 +307,12 @@ namespace kindscript {
 //
 // Then it fetches function pointer addresses from there.
   
-#define KS_SHIMS_BEGIN \
-namespace kindscript { \
+#define PXT_SHIMS_BEGIN \
+namespace pxt { \
   const uint32_t functionsAndBytecode[] __attribute__((aligned(0x20))) = { \
     0x08010801, 0x42424242, 0x08010801, 0x8de9d83e,
 
-#define KS_SHIMS_END }; }
+#define PXT_SHIMS_END }; }
 
 #endif
 

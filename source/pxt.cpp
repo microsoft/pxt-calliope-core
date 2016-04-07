@@ -1,7 +1,7 @@
-#include "kindscript.h"
+#include "pxt.h"
 #include <map>
 
-namespace kindscript {
+namespace pxt {
     int incr(uint32_t e)
     {
       if (e) {
