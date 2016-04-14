@@ -22,6 +22,8 @@
 #include <set>
 #endif
 
+extern MicroBit uBit;
+
 namespace pxt {
   typedef uint32_t Action;
   typedef uint32_t ImageLiteral;

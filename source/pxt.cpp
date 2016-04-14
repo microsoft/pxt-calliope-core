@@ -1,6 +1,8 @@
 #include "pxt.h"
 #include <map>
 
+MicroBit uBit;
+
 namespace pxt {
     int incr(uint32_t e)
     {
@@ -273,7 +275,7 @@ namespace pxt {
       if (prev)
         decr(prev);
       else
-        uBit.MessageBus.listen(id, event, dispatchEvent);
+        uBit.messageBus.listen(id, event, dispatchEvent);
       incr(a);
       handlersMap[{ id, event }] = a;
     }
@@ -296,7 +298,7 @@ namespace pxt {
   void error(ERROR code, int subcode)
   {
     printf("Error: %d [%d]\n", code, subcode);
-    panic(42);
+    uBit.panic(42);
   }
 
   uint16_t *bytecode;
@@ -340,7 +342,7 @@ namespace pxt {
     // ::touch_develop::micro_bit::radioDefaultGroup = programHash();
     
     // repeat error 4 times and restart as needed
-    uBit.display.setErrorTimeout(4);
+    microbit_panic_timeout(4);
     
     uint32_t ver = *pc++;
     checkStr(ver == 0x4208, ":( Bad runtime version");

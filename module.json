@@ -11,7 +11,7 @@
   "homepage": "https://github.com/microsoft/pxt-microbit-core",
   "license": "MIT",
   "dependencies": {
-    "microbit-dal": "lancaster-university/microbit-dal#v1.4.17"
+    "microbit": "lancaster-university/microbit#v1.0.0-rc1"
   },
   "targetDependencies": {},
   "extraIncludes": [
