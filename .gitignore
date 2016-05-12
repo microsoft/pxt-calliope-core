@@ -1,6 +1,7 @@
 .yotta.json
 build
 *.swp
+*.log
 microbit-touchdevelop/MicroBitTouchDevelop.h.gch
 test.cpp
 yotta_modules
