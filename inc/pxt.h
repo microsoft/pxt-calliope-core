@@ -43,6 +43,7 @@ namespace pxt {
   class RefRecord;
 
   // Utility functions
+  extern MicroBitEvent lastEvent;
   void registerWithDal(int id, int event, Action a);
   void runInBackground(Action a);
   void runAction0(Action a);

@@ -256,11 +256,16 @@ namespace pxt {
     // ---------------------------------------------------------------------------
 
     map<pair<int, int>, Action> handlersMap;
+    
+    MicroBitEvent lastEvent;
 
     // We have the invariant that if [dispatchEvent] is registered against the DAL
     // for a given event, then [handlersMap] contains a valid entry for that
     // event.
     void dispatchEvent(MicroBitEvent e) {
+      
+      lastEvent = e;
+      
       Action curr = handlersMap[{ e.source, e.value }];
       if (curr)
         runAction1(curr, e.value);
