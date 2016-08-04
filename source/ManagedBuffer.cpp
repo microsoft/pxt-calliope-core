@@ -267,8 +267,7 @@ ManagedBuffer ManagedBuffer::slice(int offset, int length) const
 
 void ManagedBuffer::shift(int offset, int start, int len)
 {
-    if (len < 0) len = ptr->length;
-    
+    if (len < 0) len = ptr->length - start;    
     if (start < 0 || start + len > ptr->length || start + len < start
         || len == 0 || offset == 0 || offset == INT_MIN) return;
     if (offset <= -len || offset >= len) {
@@ -290,7 +289,7 @@ void ManagedBuffer::shift(int offset, int start, int len)
 
 void ManagedBuffer::rotate(int offset, int start, int len)
 {
-    if (len < 0) len = ptr->length;
+    if (len < 0) len = ptr->length - start;
     if (start < 0 || start + len > ptr-> length || start + len < start
         || len == 0 || offset == 0 || offset == INT_MIN) return;
 
