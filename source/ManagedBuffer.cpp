@@ -265,30 +265,34 @@ ManagedBuffer ManagedBuffer::slice(int offset, int length) const
     return ManagedBuffer(ptr->payload + offset, length);
 }
 
-void ManagedBuffer::shift(int offset)
+void ManagedBuffer::shift(int offset, int start, int len)
 {
-    if (ptr->length == 0 || offset == 0 || offset == INT_MIN) return;
-    if (offset <= -ptr->length || offset >= ptr->length) {
+    if (len < 0) len = ptr->length;
+    
+    if (start < 0 || start + len > ptr->length || start + len < start
+        || len == 0 || offset == 0 || offset == INT_MIN) return;
+    if (offset <= -len || offset >= len) {
         fill(0);
         return;
     }
         
+    uint8_t *data = ptr->payload + start;
     if (offset < 0) {
         offset = -offset;
-        memmove(ptr->payload + offset, ptr->payload, ptr->length - offset);
-        memset(ptr->payload, 0, offset);
+        memmove(data + offset, data, len - offset);
+        memset(data, 0, offset);
     } else {
-        int len = ptr->length - offset;
-        memmove(ptr->payload, ptr->payload + offset, len);
-        memset(ptr->payload + len, 0, offset);
+        len = len - offset;
+        memmove(data, data + offset, len);
+        memset(data + len, 0, offset);
     }
 }
 
-void ManagedBuffer::rotate(int offset)
+void ManagedBuffer::rotate(int offset, int start, int len)
 {
-    int len = ptr->length;
-
-    if (len == 0 || offset == 0 || offset == INT_MIN) return;
+    if (len < 0) len = ptr->length;
+    if (start < 0 || start + len > ptr-> length || start + len < start
+        || len == 0 || offset == 0 || offset == INT_MIN) return;
 
     if (offset < 0)
         offset += len << 8; // try to make it positive
@@ -296,7 +300,7 @@ void ManagedBuffer::rotate(int offset)
     if (offset < 0)
         offset += len;
 
-    uint8_t *data = ptr->payload;
+    uint8_t *data = ptr->payload + start;
 
     uint8_t *n_first = data + offset;
     uint8_t *first = data;

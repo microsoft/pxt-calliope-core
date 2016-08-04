@@ -240,9 +240,9 @@ class ManagedBuffer
 
     ManagedBuffer slice(int offset = 0, int length = -1) const;
 
-    void shift(int offset);
+    void shift(int offset, int start = 0, int length = -1);
 
-    void rotate(int offset);
+    void rotate(int offset, int start = 0, int length = -1);
 
     int readBytes(uint8_t *dst, int offset, int length, bool swapBytes = false) const;
 
