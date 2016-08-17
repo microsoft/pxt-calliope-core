@@ -13,6 +13,9 @@
 #define printf(...) uBit.serial.printf(__VA_ARGS__)
 // #define printf(...)
 
+#define intcheck(...) check(__VA_ARGS__)
+//#define intcheck(...) do {} while (0)
+
 #include <stdio.h>
 #include <string.h>
 #include <vector>
@@ -243,8 +246,8 @@ namespace pxt {
     inline void stCore(int idx, uint32_t v)
     {
       //printf("ST [%d] = %d ", idx, v); this->print();
-      check(0 <= idx && idx < len, ERR_OUT_OF_BOUNDS, 10);
-      check(fields[idx] == 0, ERR_OUT_OF_BOUNDS, 11); // only one assignment permitted
+      intcheck(0 <= idx && idx < len, ERR_OUT_OF_BOUNDS, 10);
+      intcheck(fields[idx] == 0, ERR_OUT_OF_BOUNDS, 11); // only one assignment permitted
       fields[idx] = v;
     }
 

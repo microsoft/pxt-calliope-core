@@ -65,8 +65,8 @@ namespace pxt {
 
     RefRecord* mkRecord(int reflen, int totallen)
     {
-      check(0 <= reflen && reflen <= totallen, ERR_SIZE, 1);
-      check(reflen <= totallen && totallen <= 255, ERR_SIZE, 2);
+      intcheck(0 <= reflen && reflen <= totallen, ERR_SIZE, 1);
+      intcheck(reflen <= totallen && totallen <= 255, ERR_SIZE, 2);
 
       void *ptr = ::operator new(sizeof(RefRecord) + totallen * sizeof(uint32_t));
       RefRecord *r = new (ptr) RefRecord();
@@ -78,14 +78,14 @@ namespace pxt {
 
     uint32_t RefRecord::ld(int idx)
     {
-      check(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
+      intcheck(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
       return fields[idx];
     }
 
     uint32_t RefRecord::ldref(int idx)
     {
       //printf("LD %p len=%d reflen=%d idx=%d\n", this, len, reflen, idx);
-      check(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 2);
+      intcheck(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 2);
       uint32_t tmp = fields[idx];
       incr(tmp);
       return tmp;
@@ -93,14 +93,14 @@ namespace pxt {
 
     void RefRecord::st(int idx, uint32_t v)
     {
-      check(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
+      intcheck(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
       fields[idx] = v;
     }
 
     void RefRecord::stref(int idx, uint32_t v)
     {
       //printf("ST %p len=%d reflen=%d idx=%d\n", this, len, reflen, idx);
-      check(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 4);
+      intcheck(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 4);
       decr(fields[idx]);
       fields[idx] = v;
     }
