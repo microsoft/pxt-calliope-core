@@ -49,8 +49,10 @@ namespace pxt {
   extern MicroBitEvent lastEvent;
   void registerWithDal(int id, int event, Action a);
   void runInBackground(Action a);
-  void runAction0(Action a);
-  void runAction1(Action a, int arg);
+  uint32_t runAction3(Action a, int arg0, int arg1, int arg2);
+  uint32_t runAction2(Action a, int arg0, int arg1);
+  uint32_t runAction1(Action a, int arg0);
+  uint32_t runAction0(Action a);
   Action mkAction(int reflen, int totallen, int startptr);
   void error(ERROR code, int subcode = 0);
   void exec_binary(uint16_t *pc);
@@ -226,7 +228,7 @@ namespace pxt {
   };
 
   class RefAction;
-  typedef uint32_t (*ActionCB)(RefAction *, uint32_t *, uint32_t arg);
+  typedef uint32_t (*ActionCB)(uint32_t *captured, uint32_t arg0, uint32_t arg1, uint32_t arg2);
 
   // Ref-counted function pointer. It's currently always a ()=>void procedure pointer.
   class RefAction
@@ -251,10 +253,10 @@ namespace pxt {
       fields[idx] = v;
     }
 
-    inline uint32_t runCore(int arg) // use runAction*()
+    inline uint32_t runCore(int arg0, int arg1, int arg2) // internal; use runAction*() functions
     {
       this->ref();
-      uint32_t r = this->func(this, &this->fields[0], arg);
+      uint32_t r = this->func(&this->fields[0], arg0, arg1, arg2);
       this->unref();
       return r;
     }

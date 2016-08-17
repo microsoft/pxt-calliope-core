@@ -48,19 +48,29 @@ namespace pxt {
       return (Action)r;
     }
 
-    void runAction1(Action a, int arg)
+    uint32_t runAction3(Action a, int arg0, int arg1, int arg2)
     {
       if (hasVTable(a))
-        ((RefAction*)a)->runCore(arg);
+        return ((RefAction*)a)->runCore(arg0, arg1, arg2);
       else {
         check(*(uint16_t*)a == 0xffff, ERR_INVALID_BINARY_HEADER, 4);
-        ((ActionCB)((a + 4) | 1))(NULL, NULL, arg);
+        return ((ActionCB)((a + 4) | 1))(NULL, arg0, arg1, arg2);
       }
     }
 
-    void runAction0(Action a)
+    uint32_t runAction2(Action a, int arg0, int arg1)
     {
-      runAction1(a, 0);
+      return runAction3(a, arg0, arg1, 0);
+    }
+
+    uint32_t runAction1(Action a, int arg0)
+    {
+      return runAction3(a, arg0, 0, 0);
+    }
+
+    uint32_t runAction0(Action a)
+    {
+      return runAction3(a, 0, 0, 0);
     }
 
     RefRecord* mkRecord(int reflen, int totallen)
