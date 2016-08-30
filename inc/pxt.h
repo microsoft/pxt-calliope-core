@@ -41,7 +41,6 @@ namespace pxt {
 
   extern const uint32_t functionsAndBytecode[];
   extern uint32_t *globals;
-  extern int numGlobals;
   extern uint16_t *bytecode;
   class RefRecord;
 
@@ -62,6 +61,7 @@ namespace pxt {
   uint32_t *allocate(uint16_t sz);
   int templateHash();
   int programHash();
+  int getNumGlobals();
   RefRecord* mkRecord(int reflen, int totallen);
 
   // The standard calling convention is:

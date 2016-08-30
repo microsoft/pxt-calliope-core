@@ -347,7 +347,12 @@ namespace pxt {
     return ((int*)bytecode)[6];
   }
 
-  void exec_binary(uint16_t *pc)
+  int getNumGlobals()
+  {
+    return bytecode[16];
+  }
+
+  void exec_binary(int32_t *pc)
   {
     // XXX re-enable once the calibration code is fixed and [editor/embedded.ts]
     // properly prepends a call to [internal_main].
@@ -359,17 +364,15 @@ namespace pxt {
     // repeat error 4 times and restart as needed
     microbit_panic_timeout(4);
     
-    uint32_t ver = *pc++;
-    checkStr(ver == 0x4208, ":( Bad runtime version");
-    numGlobals = *pc++;
-    globals = allocate(numGlobals);
+    int32_t ver = *pc++;
+    checkStr(ver == 0x4209, ":( Bad runtime version");
 
-    bytecode = *((uint16_t**)pc);  // the actual bytecode is here
-    pc += 2;
+    bytecode = *((uint16_t**)pc++);  // the actual bytecode is here
+    globals = allocate(getNumGlobals());
 
     // just compare the first word
     checkStr(((uint32_t*)bytecode)[0] == 0x923B8E70 &&
-             templateHash() == ((int*)pc)[0],
+             templateHash() == *pc,
              ":( Failed partial flash");
 
     uint32_t startptr = (uint32_t)bytecode;
@@ -387,7 +390,7 @@ namespace pxt {
 
   void start()
   {
-    exec_binary((uint16_t*)functionsAndBytecode);
+    exec_binary((int32_t*)functionsAndBytecode);
   }
 }  
 
