@@ -63,6 +63,7 @@ namespace pxt {
   int programHash();
   int getNumGlobals();
   RefRecord* mkRecord(int reflen, int totallen);
+  RefRecord* mkClassInstance(int vtableOffset);
 
   // The standard calling convention is:
   //   - when a pointer is loaded from a local/global/field etc, and incr()ed
@@ -202,6 +203,14 @@ namespace pxt {
     void setAt(int x, uint32_t y);
     int indexOf(uint32_t x, int start);
     int removeElement(uint32_t x);
+  };
+
+  struct VTable {
+    uint16_t refcount; // 0xffff
+    uint8_t numfields;
+    uint8_t nummethods;
+    uint32_t methods[];
+    // refmask sits at &methods[nummethods]
   };
 
   // A ref-counted, user-defined Touch Develop object.

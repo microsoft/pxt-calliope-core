@@ -76,7 +76,7 @@ namespace pxt {
     RefRecord* mkRecord(int reflen, int totallen)
     {
       intcheck(0 <= reflen && reflen <= totallen, ERR_SIZE, 1);
-      intcheck(reflen <= totallen && totallen <= 255, ERR_SIZE, 2);
+      intcheck(reflen <= totallen && totallen < 255, ERR_SIZE, 2);
 
       void *ptr = ::operator new(sizeof(RefRecord) + totallen * sizeof(uint32_t));
       RefRecord *r = new (ptr) RefRecord();
@@ -86,9 +86,23 @@ namespace pxt {
       return r;
     }
 
+    RefRecord* mkClassInstance(int vtableOffset)
+    {
+      VTable *vtable = (VTable*)&bytecode[vtableOffset];
+      intcheck(vtable->refcount == 0xffff, ERR_SIZE, 3);
+    
+      void *ptr = ::operator new(sizeof(RefRecord) + vtable->numfields * sizeof(uint32_t));
+      RefRecord *r = new (ptr) RefRecord();
+      r->len = vtable->numfields;
+      r->reflen = 255;
+      memset(r->fields, 0, r->len * sizeof(uint32_t));
+      r->fields[0] = (uint32_t)vtable;
+      return r;
+    }
+
     uint32_t RefRecord::ld(int idx)
     {
-      intcheck(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
+      intcheck((reflen == 255 ? 0 : reflen) <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
       return fields[idx];
     }
 
@@ -103,7 +117,7 @@ namespace pxt {
 
     void RefRecord::st(int idx, uint32_t v)
     {
-      intcheck(reflen <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
+      intcheck((reflen == 255 ? 0 : reflen) <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
       fields[idx] = v;
     }
 
@@ -117,10 +131,20 @@ namespace pxt {
 
     RefRecord::~RefRecord()
     {
-      //printf("DELREC: %p\n", this);
-      for (int i = 0; i < this->reflen; ++i) {
-        decr(fields[i]);
-        fields[i] = 0;
+      if (reflen == 255) {
+        // assuming vtable
+        VTable *tbl = (VTable*)fields[0];
+        uint8_t *refmask = (uint8_t*)&tbl->methods[tbl->nummethods];
+        int len = tbl->numfields;
+        for (int i = 0; i < len; ++i) {
+          if (refmask[i]) decr(fields[i]);
+          fields[i] = 0;
+        }
+      } else {
+        for (int i = 0; i < this->reflen; ++i) {
+          decr(fields[i]);
+          fields[i] = 0;
+        }
       }
     }
 
