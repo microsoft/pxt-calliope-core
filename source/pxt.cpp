@@ -287,6 +287,12 @@ namespace pxt {
       return -1;
     }
 
+    void RefMap::print()
+    {
+      printf("RefMap %p r=%d size=%d\n", this, refcnt, data.size());
+    }
+
+
 #ifdef DEBUG_MEMLEAKS
   std::set<RefObject*> allptrs;
   void debugMemLeaks()
