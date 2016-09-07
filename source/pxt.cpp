@@ -269,6 +269,24 @@ namespace pxt {
       decr(v);
     }
 
+    RefMap::~RefMap() {
+      for (unsigned i = 0; i < data.size(); ++i) {
+        if (data[i].key & 1) {
+          decr(data[i].val);
+        }
+        data[i].val = 0;
+      }
+      data.resize(0);
+    }
+
+    int RefMap::findIdx(uint32_t key) {
+      for (unsigned i = 0; i < data.size(); ++i) {
+        if (data[i].key >> 1 == key)
+          return i;
+      }
+      return -1;
+    }
+
 #ifdef DEBUG_MEMLEAKS
   std::set<RefObject*> allptrs;
   void debugMemLeaks()

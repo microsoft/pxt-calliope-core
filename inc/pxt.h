@@ -205,6 +205,27 @@ namespace pxt {
     int removeElement(uint32_t x);
   };
 
+  struct MapEntry {
+    uint32_t key;
+    uint32_t val;
+  };
+
+  class RefMap
+    : public RefObject
+  {
+  public:
+    uint16_t padding;
+    uint32_t vtable;
+    std::vector<MapEntry> data;
+
+    RefMap() : padding(0), vtable(42) {}
+
+    virtual ~RefMap();
+    virtual void print();
+
+    int findIdx(uint32_t key);
+  };
+
   struct VTable {
     uint16_t refcount; // 0xffff
     uint8_t numfields;
