@@ -73,43 +73,29 @@ namespace pxt {
       return runAction3(a, 0, 0, 0);
     }
 
-    RefRecord* mkRecord(int reflen, int totallen)
-    {
-      intcheck(0 <= reflen && reflen <= totallen, ERR_SIZE, 1);
-      intcheck(reflen <= totallen && totallen < 255, ERR_SIZE, 2);
-
-      void *ptr = ::operator new(sizeof(RefRecord) + totallen * sizeof(uint32_t));
-      RefRecord *r = new (ptr) RefRecord();
-      r->len = totallen;
-      r->reflen = reflen;
-      memset(r->fields, 0, r->len * sizeof(uint32_t));
-      return r;
-    }
-
     RefRecord* mkClassInstance(int vtableOffset)
     {
       VTable *vtable = (VTable*)&bytecode[vtableOffset];
-      intcheck(vtable->refcount == 0xffff, ERR_SIZE, 3);
+
+      intcheck(vtable->methods[0] == &RefRecord_destroy, ERR_SIZE, 3);
+      intcheck(vtable->methods[1] == &RefRecord_print, ERR_SIZE, 4);
     
-      void *ptr = ::operator new(sizeof(RefRecord) + vtable->numfields * sizeof(uint32_t));
-      RefRecord *r = new (ptr) RefRecord();
-      r->len = vtable->numfields;
-      r->reflen = 255;
-      memset(r->fields, 0, r->len * sizeof(uint32_t));
-      r->fields[0] = (uint32_t)vtable;
+      void *ptr = ::operator new(vtable->numbytes);
+      RefRecord *r = new (ptr) RefRecord(PXT_VTABLE_TO_INT(vtable));
+      memset(r->fields, 0, vtable->numbytes - sizeof(RefRecord));
       return r;
     }
 
     uint32_t RefRecord::ld(int idx)
     {
-      intcheck((reflen == 255 ? 0 : reflen) <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
+      //intcheck((reflen == 255 ? 0 : reflen) <= idx && idx < len, ERR_OUT_OF_BOUNDS, 1);
       return fields[idx];
     }
 
     uint32_t RefRecord::ldref(int idx)
     {
       //printf("LD %p len=%d reflen=%d idx=%d\n", this, len, reflen, idx);
-      intcheck(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 2);
+      //intcheck(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 2);
       uint32_t tmp = fields[idx];
       incr(tmp);
       return tmp;
@@ -117,52 +103,51 @@ namespace pxt {
 
     void RefRecord::st(int idx, uint32_t v)
     {
-      intcheck((reflen == 255 ? 0 : reflen) <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
+      //intcheck((reflen == 255 ? 0 : reflen) <= idx && idx < len, ERR_OUT_OF_BOUNDS, 3);
       fields[idx] = v;
     }
 
     void RefRecord::stref(int idx, uint32_t v)
     {
       //printf("ST %p len=%d reflen=%d idx=%d\n", this, len, reflen, idx);
-      intcheck(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 4);
+      //intcheck(0 <= idx && idx < reflen, ERR_OUT_OF_BOUNDS, 4);
       decr(fields[idx]);
       fields[idx] = v;
     }
 
-    RefRecord::~RefRecord()
-    {
-      if (reflen == 255) {
-        // assuming vtable
-        VTable *tbl = (VTable*)fields[0];
-        uint8_t *refmask = (uint8_t*)&tbl->methods[tbl->nummethods];
-        int len = tbl->numfields;
+    void RefObject::destroy() {
+      ((RefObjectMethod)getVTable()->methods[0])(this);
+      delete this;
+    }
+
+    void RefObject::print() {
+      ((RefObjectMethod)getVTable()->methods[1])(this);
+    }
+
+    void RefRecord_destroy(RefRecord *r) {
+        auto tbl = r->getVTable();
+        uint8_t *refmask = (uint8_t*)&tbl->methods[tbl->userdata & 0xff];
+        int len = (tbl->numbytes >> 2) - 1;
         for (int i = 0; i < len; ++i) {
-          if (refmask[i]) decr(fields[i]);
-          fields[i] = 0;
+          if (refmask[i]) decr(r->fields[i]);
+          r->fields[i] = 0;
         }
-      } else {
-        for (int i = 0; i < this->reflen; ++i) {
-          decr(fields[i]);
-          fields[i] = 0;
-        }
-      }
     }
 
-    void RefRecord::print()
+    void RefRecord_print(RefRecord *r)
     {
-      printf("RefRecord %p r=%d size=%d (%d refs)\n", this, refcnt, len, reflen);
+      printf("RefRecord %p r=%d size=%d bytes\n", r, r->refcnt, r->getVTable()->numbytes);
     }
-
 
     void RefCollection::push(uint32_t x) {
-      if (flags & 1) incr(x);
+      if (isRef()) incr(x);
       data.push_back(x);
     }
 
     uint32_t RefCollection::getAt(int x) {
       if (in_range(x)) {
         uint32_t tmp = data.at(x);
-        if (flags & 1) incr(tmp);
+        if (isRef()) incr(tmp);
         return tmp;
       }
       else {
@@ -175,7 +160,7 @@ namespace pxt {
       if (!in_range(x))
         return;
 
-      if (flags & 1) decr(data.at(x));
+      if (isRef()) decr(data.at(x));
       data.erase(data.begin()+x);
     }
 
@@ -183,7 +168,7 @@ namespace pxt {
       if (!in_range(x))
         return;
 
-      if (flags & 1) {
+      if (isRef()) {
         decr(data.at(x));
         incr(y);
       }
@@ -194,7 +179,7 @@ namespace pxt {
       if (!in_range(start))
         return -1;
 
-      if (flags & 2) {
+      if (isString()) {
         StringData *xx = (StringData*)x;
         for (uint32_t i = start; i < data.size(); ++i) {
           StringData *ee = (StringData*)data.at(i);
@@ -219,29 +204,55 @@ namespace pxt {
       return 0;
     }
 
-    void RefObject::print()
-    {
-      printf("RefObject %p\n", this);
+    namespace Coll0 {
+      PXT_VTABLE_BEGIN(RefCollection, 0, 0)
+      PXT_VTABLE_END
+    }
+    namespace Coll1 {
+      PXT_VTABLE_BEGIN(RefCollection, 1, 0)
+      PXT_VTABLE_END
+    }
+    namespace Coll3 {
+      PXT_VTABLE_BEGIN(RefCollection, 3, 0)
+      PXT_VTABLE_END
     }
 
-    RefCollection::~RefCollection()
+    RefCollection::RefCollection(uint16_t flags) : RefObject(0) {
+      switch (flags) {
+        case 0:
+          vtable = PXT_VTABLE_TO_INT(&Coll0::RefCollection_vtable);
+          break;
+        case 1:
+          vtable = PXT_VTABLE_TO_INT(&Coll1::RefCollection_vtable);
+          break;
+        case 3:
+          vtable = PXT_VTABLE_TO_INT(&Coll3::RefCollection_vtable);
+          break;
+        default:
+          error(ERR_SIZE);
+          break;
+      }
+    }
+
+    void RefCollection::destroy()
     {
-      // printf("KILL "); this->print();
-      if (flags & 1)
-        for (uint32_t i = 0; i < data.size(); ++i) {
-          decr(data[i]);
-          data[i] = 0;
+      if (this->isRef())
+        for (uint32_t i = 0; i < this->data.size(); ++i) {
+          decr(this->data[i]);
+          this->data[i] = 0;
         }
-      data.resize(0);
+      this->data.resize(0);
     }
 
     void RefCollection::print()
     {
-      printf("RefCollection %p r=%d flags=%d size=%d [%p, ...]\n", this, refcnt, flags, data.size(), data.size() > 0 ? data[0] : 0);
+      printf("RefCollection %p r=%d flags=%d size=%d [%p, ...]\n", this, refcnt, getFlags(), data.size(), data.size() > 0 ? data[0] : 0);
     }
 
+    PXT_VTABLE_CTOR(RefAction) {}
+
     // fields[] contain captured locals
-    RefAction::~RefAction()
+    void RefAction::destroy()
     {
       for (int i = 0; i < this->reflen; ++i) {
         decr(fields[i]);
@@ -259,17 +270,33 @@ namespace pxt {
       printf("RefLocal %p r=%d v=%d\n", this, refcnt, v);
     }
 
+    void RefLocal::destroy()
+    {
+    }
+
+    PXT_VTABLE_CTOR(RefLocal) {
+      v = 0;
+    }
+
+    PXT_VTABLE_CTOR(RefRefLocal) {
+      v = 0;
+    }
+
     void RefRefLocal::print()
     {
       printf("RefRefLocal %p r=%d v=%p\n", this, refcnt, (void*)v);
     }
 
-    RefRefLocal::~RefRefLocal()
+    void RefRefLocal::destroy()
     {
       decr(v);
     }
 
-    RefMap::~RefMap() {
+    PXT_VTABLE_BEGIN(RefMap, 0, RefMapMarker)
+    PXT_VTABLE_END
+    RefMap::RefMap() : PXT_VTABLE_INIT(RefMap) {}
+
+    void RefMap::destroy() {
       for (unsigned i = 0; i < data.size(); ++i) {
         if (data[i].key & 1) {
           decr(data[i].val);
@@ -430,7 +457,7 @@ namespace pxt {
     ((uint32_t (*)())startptr)();
 
 #ifdef DEBUG_MEMLEAKS
-    bitvm::debugMemLeaks();
+    pxt::debugMemLeaks();
 #endif
 
     return;

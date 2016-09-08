@@ -62,7 +62,6 @@ namespace pxt {
   int templateHash();
   int programHash();
   int getNumGlobals();
-  RefRecord* mkRecord(int reflen, int totallen);
   RefRecord* mkClassInstance(int vtableOffset);
 
   // The standard calling convention is:
@@ -96,28 +95,52 @@ namespace pxt {
   }
 
 
-#ifdef DEBUG_MEMLEAKS
   class RefObject;
+#ifdef DEBUG_MEMLEAKS
   extern std::set<RefObject*> allptrs;
 #endif
+
+  typedef void (*RefObjectMethod)(RefObject *self);
+  typedef void *PVoid;
+  typedef void **PPVoid;
+
+  const PPVoid RefMapMarker = (PPVoid)(void*)43;
+
+  struct VTable {
+    uint16_t numbytes;  // in the entire object, including the vtable pointer
+    uint16_t userdata;
+    PVoid *ifaceTable;
+    PVoid methods[10];
+    // refmask sits at &methods[nummethods]
+  };
+
+  const int vtableShift = 2;
 
   // A base abstract class for ref-counted objects.
   class RefObject
   {
   public:
     uint16_t refcnt;
+    uint16_t vtable;
 
-    RefObject()
+    RefObject(uint16_t vt)
     {
-      refcnt = 1;
+      refcnt = 2;
+      vtable = vt;
 #ifdef DEBUG_MEMLEAKS
       allptrs.insert(this);
 #endif
     }
 
-    // Call to disable pointer tracking on the current instance.
-    void canLeak()
-    {
+    inline VTable *getVTable() {
+      return (VTable*)(vtable << vtableShift);
+    }
+
+    void destroy();
+    void print();
+
+    // Call to disable pointer tracking on the current instance (in destructor or some other hack)
+    inline void untrack() {
 #ifdef DEBUG_MEMLEAKS
       allptrs.erase(this);
 #endif
@@ -128,51 +151,17 @@ namespace pxt {
     {
       check(refcnt > 0, ERR_REF_DELETED);
       //printf("INCR "); this->print();
-      refcnt++;
+      refcnt += 2;
     }
 
     inline void unref()
     {
       //printf("DECR "); this->print();
-      if (--refcnt == 0) {
-        delete this;
+      refcnt -= 2;
+      if (refcnt == 0) {
+        destroy();
       }
     }
-
-    virtual void print();
-
-    virtual ~RefObject()
-    {
-      // This is just a base class for ref-counted objects.
-      // There is nothing to free yet, but derived classes will have things to free.
-#ifdef DEBUG_MEMLEAKS
-      allptrs.erase(this);
-#endif
-    }
-
-    // This is used by indexOf function, overridden in RefString
-    virtual bool equals(RefObject *other)
-    {
-      return this == other;
-    }
-  };
-
-  // Ref-counted wrapper around any C++ object.
-  template <class T>
-  class RefStruct
-    : public RefObject
-  {
-  public:
-    T v;
-
-    virtual ~RefStruct() { }
-
-    virtual void print()
-    {
-      printf("RefStruct %p r=%d\n", this, refcnt);
-    }
-
-    RefStruct(const T& i) : v(i) {}
   };
 
   // A ref-counted collection of either primitive or ref-counted objects (String, Image,
@@ -183,19 +172,22 @@ namespace pxt {
   public:
     // 1 - collection of refs (need decr)
     // 2 - collection of strings (in fact we always have 3, never 2 alone)
-    uint16_t flags;
+    inline uint32_t getFlags() { return getVTable()->userdata; }
+    inline bool isRef() { return getFlags() & 1; }
+    inline bool isString() { return getFlags() & 2; }
+
     std::vector<uint32_t> data;
 
-    RefCollection(uint16_t f) : flags(f) {}
-
-    virtual ~RefCollection();
-    virtual void print();
+    RefCollection(uint16_t f);
 
     inline bool in_range(int x) {
       return (0 <= x && x < (int)data.size());
     }
 
     inline int length() { return data.size(); }
+
+    void destroy();
+    void print();
 
     void push(uint32_t x);
     uint32_t getAt(int x);
@@ -214,48 +206,33 @@ namespace pxt {
     : public RefObject
   {
   public:
-    uint16_t padding;
-    uint32_t vtable;
     std::vector<MapEntry> data;
 
-    RefMap() : padding(0), vtable(42) {}
-
-    virtual ~RefMap();
-    virtual void print();
-
+    RefMap();
+    void destroy();
+    void print();
     int findIdx(uint32_t key);
   };
 
-  struct VTable {
-    uint16_t refcount; // 0xffff
-    uint8_t numfields;
-    uint8_t nummethods;
-    uint32_t methods[];
-    // refmask sits at &methods[nummethods]
-  };
-
-  // A ref-counted, user-defined Touch Develop object.
+  // A ref-counted, user-defined JS object.
   class RefRecord
     : public RefObject
   {
   public:
-    // Total number of fields.
-    uint8_t len; 
-    // Number of fields which are ref-counted pointers; these always come first
-    // on the fields[] array.
-    uint8_t reflen; 
     // The object is allocated, so that there is space at the end for the fields.
     uint32_t fields[];
 
-    virtual ~RefRecord();
-    virtual void print();
+    RefRecord(uint16_t v) : RefObject(v) {}
 
     uint32_t ld(int idx);
     uint32_t ldref(int idx);
     void st(int idx, uint32_t v);
     void stref(int idx, uint32_t v);
-
   };
+
+  // these are needed when constructing vtables for user-defined classes
+  void RefRecord_destroy(RefRecord *r);
+  void RefRecord_print(RefRecord *r);
 
   class RefAction;
   typedef uint32_t (*ActionCB)(uint32_t *captured, uint32_t arg0, uint32_t arg1, uint32_t arg2);
@@ -272,8 +249,10 @@ namespace pxt {
     // fields[] contain captured locals
     uint32_t fields[];
 
-    virtual ~RefAction();
-    virtual void print();
+    void destroy();
+    void print();
+
+    RefAction();
 
     inline void stCore(int idx, uint32_t v)
     {
@@ -298,9 +277,9 @@ namespace pxt {
   {
   public:
     uint32_t v;
-
-    virtual void print();
-    RefLocal() : v(0) {}
+    void destroy();
+    void print();
+    RefLocal();
   };
 
   class RefRefLocal
@@ -308,36 +287,10 @@ namespace pxt {
   {
   public:
     uint32_t v;
-
-    virtual void print();
-    virtual ~RefRefLocal();
-
-    RefRefLocal() : v(0) {}
+    void destroy();
+    void print();
+    RefRefLocal();
   };
-
-
-  // A ref-counted byte buffer
-  class RefBuffer
-    : public RefObject
-  {
-  public:
-    std::vector<uint8_t> data;
-
-    virtual ~RefBuffer()
-    {
-      data.resize(0);
-    }
-
-    virtual void print()
-    {
-      printf("RefBuffer %p r=%d size=%d [%p, ...]\n", this, refcnt, data.size(), data.size() > 0 ? data[0] : 0);
-    }
-
-    char *cptr() { return (char*)&data[0]; }
-    int size() { return data.size(); }
-
-  };
-
 }
 
 // The ARM Thumb generator in the JavaScript code is parsing
@@ -351,6 +304,29 @@ namespace pxt { \
     0x08010801, 0x42424242, 0x08010801, 0x8de9d83e,
 
 #define PXT_SHIMS_END }; }
+
+#pragma GCC diagnostic ignored "-Wpmf-conversions"
+
+#define PXT_VTABLE_TO_INT(vt)  ((uint32_t)(vt) >> vtableShift)
+#define PXT_VTABLE_BEGIN(classname, flags, iface) \
+const VTable classname ## _vtable \
+  __attribute__((aligned(1 << vtableShift))) \
+  = { \
+  sizeof(classname), \
+  flags, \
+  iface, \
+  { \
+    (void*)&classname::destroy, \
+    (void*)&classname::print,
+
+#define PXT_VTABLE_END } };
+
+#define PXT_VTABLE_INIT(classname) \
+  RefObject(PXT_VTABLE_TO_INT(&classname ## _vtable))
+
+#define PXT_VTABLE_CTOR(classname) \
+  PXT_VTABLE_BEGIN(classname, 0, 0) PXT_VTABLE_END \
+  classname::classname() : PXT_VTABLE_INIT(classname)
 
 #endif
 
