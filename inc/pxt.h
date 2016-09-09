@@ -110,7 +110,7 @@ namespace pxt {
     uint16_t numbytes;  // in the entire object, including the vtable pointer
     uint16_t userdata;
     PVoid *ifaceTable;
-    PVoid methods[10];
+    PVoid methods[2]; // we only use up to two methods here; pxt will generate more
     // refmask sits at &methods[nummethods]
   };
 
