@@ -1,17 +1,17 @@
 {
-  "name": "pxt-microbit-core",
+  "name": "pxt-calliope-core",
   "version": "0.5.0",
-  "description": "The glue layer that binds together PXT programs compiled to C++ and a BBC micro:bit runtime system.",
+  "description": "The glue layer that binds together PXT programs compiled to C++ and a Calliope runtime system.",
   "keywords": [],
   "author": "Microsoft Corporation",
   "repository": {
-    "url": "ssh://git@github.com:Microsoft/pxt-microbit-core.git",
+    "url": "ssh://git@github.com:Microsoft/pxt-calliope-core.git",
     "type": "git"
   },
-  "homepage": "https://github.com/microsoft/pxt-microbit-core",
+  "homepage": "https://github.com/microsoft/pxt-calliope-core",
   "license": "MIT",
   "dependencies": {
-    "microbit": "lancaster-university/microbit#v2.0.0-rc4"
+    "microbit": "calliope-mini/microbit#integrated-20160918"
   },
   "targetDependencies": {},
   "extraIncludes": [
