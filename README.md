@@ -12,4 +12,4 @@ Run `./run.sh`.
 
 You cannot use local version of this package in PXT. After making changes,
 and making sure everything builds, you need to bump version in git
-using `./bump.sh` and then update version number in `pxt-microbit/pxtarget.json`.
+using `./bump.sh` and then update version number in `pxt-calliope/pxtarget.json`.
