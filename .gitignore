@@ -8,3 +8,5 @@ yotta_targets
 Makefile.local
 ext
 upload.tar.gz
+*.iml
+.idea
