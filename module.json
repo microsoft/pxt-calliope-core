@@ -11,7 +11,7 @@
   "homepage": "https://github.com/microsoft/pxt-calliope-core",
   "license": "MIT",
   "dependencies": {
-    "microbit": "calliope-mini/microbit#v0.2.1-calliope"
+    "microbit": "calliope-mini/microbit#v0.2.2-calliope"
   },
   "targetDependencies": {},
   "extraIncludes": [
