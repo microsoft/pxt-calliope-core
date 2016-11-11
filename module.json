@@ -1,6 +1,6 @@
 {
   "name": "pxt-calliope-core",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "description": "The glue layer that binds together PXT programs compiled to C++ and a Calliope runtime system.",
   "keywords": [],
   "author": "Microsoft Corporation",
@@ -11,7 +11,7 @@
   "homepage": "https://github.com/microsoft/pxt-calliope-core",
   "license": "MIT",
   "dependencies": {
-    "microbit": "calliope-mini/microbit#v1.0.1-calliope"
+    "microbit": "calliope-mini/microbit#v1.0.2-calliope"
   },
   "targetDependencies": {},
   "extraIncludes": [
