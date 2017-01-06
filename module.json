@@ -1,6 +1,6 @@
 {
   "name": "pxt-calliope-core",
-  "version": "0.5.16",
+  "version": "0.5.17",
   "description": "The glue layer that binds together PXT programs compiled to C++ and a Calliope runtime system.",
   "keywords": [],
   "author": "Microsoft Corporation",
